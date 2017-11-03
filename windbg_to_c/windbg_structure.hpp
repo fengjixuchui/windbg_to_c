@@ -22,53 +22,52 @@ const std::map<std::string, std::string> known_types = {
     {"Uint8B", "ULONGLONG"}
 };
 
-enum field_types
-{
+enum field_types {
     regular_field,
     array_field,
     bitfield,
 };
 
-class windbg_structure
-{
+class windbg_structure {
 public:
-    windbg_structure(const std::string& text);
+    windbg_structure( const std::string& text );
 
-    static bool is_header(const std::string& line);
+    static bool is_header( const std::string& line );
 
     template<typename Iter>
-    static bool is_union_or_bitfield(Iter it)
+    static bool is_union_or_bitfield( Iter it )
     {
-        try {
-            return parse_field_offset(*it) == parse_field_offset(*(it + 1));
-        } catch(const std::out_of_range&) { //end iterator throws when you try to increment past it
+        try 
+        {
+            return parse_field_offset( *it ) == parse_field_offset( *(it + 1) );
+        }
+        catch (const std::out_of_range&) 
+        { 
+            // end iterator throws when you try to increment past it
             return false;
         }
     }
 
-    const std::string& get_name() const
-    {
-        return _name;
-    }
+    const std::string& get_name( ) const { return _name; }
 
-    std::string as_string(int tabcount = 0) const;
+    std::string as_string( int tabcount = 0 ) const;
 
 private:
-    static std::string parse_field_name(const std::string& line)
+    static std::string parse_field_name( const std::string& line )
     {
-        auto name_start = line.find_first_of(' ') + 1;
-        auto name_end = line.find_first_of(':');
-        auto temp = line.substr(name_start, name_end - name_start);
-        return trim_spaces(temp);
+        auto name_start = line.find_first_of( ' ' ) + 1;
+        auto name_end = line.find_first_of( ':' );
+        auto temp = line.substr( name_start, name_end - name_start );
+        return trim_spaces( temp );
     }
 
-    static uint32_t parse_field_offset(const std::string& line)
+    static uint32_t parse_field_offset( const std::string& line )
     {
-        auto temp = line.substr(3, line.find_first_of(' ') - 3);
-        return strtoul(std::data(temp), nullptr, 16);
+        auto temp = line.substr( 3, line.find_first_of( ' ' ) - 3 );
+        return strtoul( std::data( temp ), nullptr, 16 );
     }
-    
-    static std::unique_ptr<windbg_field> parse_field(const std::string& line);
+
+    static std::unique_ptr<windbg_field> parse_field( const std::string& line );
 private:
     std::string _name;
     std::vector<std::unique_ptr<windbg_field>> _fields;
